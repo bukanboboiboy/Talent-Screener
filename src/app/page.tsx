@@ -1,65 +1,174 @@
-import Image from "next/image";
+// file: src/app/page.tsx
+'use client';
 
-export default function Home() {
+import { useState, useEffect } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { useUploadQueue, UploadItem } from '@/hooks/useUploadQueue';
+import { Button } from '@/components/ui/button';
+import ScoreDisplay from '@/components/ScoreDisplay';
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+// Helper untuk warna status (tidak berubah)
+const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending': return 'bg-gray-100 text-gray-800';
+      case 'uploading': return 'bg-blue-100 text-blue-800';
+      case 'polling': return 'bg-yellow-100 text-yellow-800';
+      case 'success': return 'bg-green-100 text-green-800';
+      case 'error': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+};
+
+// Helper untuk ikon status (tidak berubah)
+const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'pending': return '⏳';
+      case 'uploading': return '📤';
+      case 'polling': return '⚙️';
+      case 'success': return '✅';
+      case 'error': return '❌';
+      default: return '❓';
+    }
+};
+
+export default function HomePage() {
+  const [jobDescription, setJobDescription] = useState('');
+  const { uploads, isProcessing, addToQueue, removeUpload, processQueue, clearQueue, pollResults } = useUploadQueue();
+  const [selectedUpload, setSelectedUpload] = useState<UploadItem | null>(null);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop: (acceptedFiles) => {
+      addToQueue(acceptedFiles);
+    },
+    accept: { 'application/pdf': ['.pdf'], 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'] },
+    multiple: true,
+  });
+
+  const handleStartProcessing = () => {
+    if (!jobDescription.trim()) {
+      alert('Please provide a job description.');
+      return;
+    }
+    processQueue(jobDescription);
+  };
+  
+  useEffect(() => {
+    const isPollingActive = uploads.some(u => u.status === 'polling');
+    if (!isPollingActive) return;
+
+    const intervalId = setInterval(() => {
+      pollResults();
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [uploads, pollResults]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="max-w-4xl mx-auto p-6 space-y-6">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold">Talent Screener AI</h1>
+        <p className="text-gray-600 mt-2">Batch Process Multiple CVs with Advanced State Management</p>
+      </div>
+      
+      {/* Form Input */}
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-xl font-semibold mb-4">1. Job Description</h2>
+        <textarea
+          value={jobDescription}
+          onChange={(e) => setJobDescription(e.target.value)}
+          placeholder="Enter the job description..."
+          className="w-full h-24 p-3 border rounded-lg resize-none"
+          disabled={isProcessing}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+      </div>
+
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-xl font-semibold mb-4">2. Upload CVs</h2>
+        <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${isDragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-300'}`}>
+          <input {...getInputProps()} />
+          <p>Drag 'n' drop some files here, or click to select files</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </div>
+
+      {/* Upload Queue */}
+      {uploads.length > 0 && (
+        <div className="bg-white p-6 rounded-lg shadow">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">Upload Queue ({uploads.length})</h3>
+            <div className="flex gap-2">
+              <Button onClick={handleStartProcessing} disabled={isProcessing || uploads.every(u => u.status !== 'pending')}>
+                {isProcessing ? 'Processing...' : 'Start Processing'}
+              </Button>
+              <Button variant="outline" onClick={clearQueue} disabled={isProcessing}>
+                Clear All
+              </Button>
+            </div>
+          </div>
+          
+          <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+            {uploads.map((upload) => (
+              <div key={upload.id} className="flex items-center gap-4 p-4 border rounded-lg bg-gray-50">
+                <span className="text-2xl">{getStatusIcon(upload.status)}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{upload.file.name}</p>
+                  <p className="text-sm text-gray-600">{upload.message}</p>
+                  {upload.status === 'success' && upload.result && (
+                    <p className="text-sm font-bold text-blue-600 mt-1">
+                      Score: {upload.result.Score} / 100
+                    </p>
+                  )}
+                </div>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(upload.status)}`}>
+                    {upload.status.toUpperCase()}
+                </span>
+                
+                {/* --- BAGIAN YANG DIPERBAIKI --- */}
+                {/* Tombol "View Details" hanya akan muncul jika status 'success' */}
+                {upload.status === 'success' && (
+                    <Button variant="secondary" size="sm" onClick={() => setSelectedUpload(upload)}>
+                        View Details
+                    </Button>
+                )}
+                {/* ---------------------------------- */}
+
+                <Button variant="ghost" size="sm" onClick={() => removeUpload(upload.id)} disabled={isProcessing}>
+                  X
+                </Button>
+              </div>
+            ))}
+          </div>
         </div>
-      </main>
-    </div>
+      )}
+
+        {/* Komponen Modal (Dialog) */}
+        <Dialog open={!!selectedUpload} onOpenChange={() => setSelectedUpload(null)}>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle className="truncate">Analysis for: {selectedUpload?.file.name}</DialogTitle>
+                </DialogHeader>
+                {selectedUpload?.result && (
+                    <div className="py-4">
+                        <ScoreDisplay
+                            score={selectedUpload.result.Score}
+                            // Ditambahkan pengecekan untuk memastikan 'Summary' adalah string sebelum di-parse
+                            // Ini membuat kode lebih aman (robust)
+                            summary={
+                                typeof selectedUpload.result.Summary === 'string' 
+                                ? JSON.parse(selectedUpload.result.Summary) 
+                                : []
+                            }
+                        />
+                    </div>
+                )}
+            </DialogContent>
+        </Dialog>
+    </main>
   );
 }
