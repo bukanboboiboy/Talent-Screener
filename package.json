@@ -1,6 +1,7 @@
 {
   "name": "talent-screener-frontend",
   "version": "0.1.0",
+  "homepage": "https://bukanboboiboy.online",
   "private": true,
   "scripts": {
     "dev": "next dev",
