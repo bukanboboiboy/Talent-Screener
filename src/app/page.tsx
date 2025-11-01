@@ -49,6 +49,7 @@ export default function HomePage() {
     },
     accept: { 'application/pdf': ['.pdf'], 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'] },
     multiple: true,
+    noClick: true,
   });
 
   const handleStartProcessing = () => {
@@ -71,7 +72,22 @@ export default function HomePage() {
   }, [uploads, pollResults]);
 
   return (
-    <main className="max-w-4xl mx-auto p-6 space-y-6">
+    <div {...getRootProps()} className={`min-h-screen transition-colors ${isDragActive ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}>
+      <input {...getInputProps()} />
+      {isDragActive && (
+        <div className="fixed inset-0 bg-blue-500/20 backdrop-blur-sm z-40 flex items-center justify-center">
+          <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl border-2 border-dashed border-blue-400">
+            <div className="text-center">
+              <svg className="w-16 h-16 mx-auto text-blue-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Drop your CVs here</h3>
+              <p className="text-gray-600 dark:text-gray-300">PDF and DOCX files supported</p>
+            </div>
+          </div>
+        </div>
+      )}
+      <main className="max-w-4xl mx-auto p-6 space-y-6">
       <div className="text-center">
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Talent Screener AI</h1>
         <p className="text-gray-600 dark:text-gray-300 mt-2">Batch Process Multiple CVs with Advanced State Management</p>
@@ -91,9 +107,13 @@ export default function HomePage() {
 
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
         <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">2. Upload CVs</h2>
-        <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors text-gray-700 dark:text-gray-300 ${isDragActive ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'}`}>
-          <input {...getInputProps()} />
-          <p>Drag 'n' drop some files here, or click to select files</p>
+        <div className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20" onClick={() => document.querySelector('input[type="file"]')?.click()}>
+          <svg className="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+          <p className="text-lg font-medium mb-2">Drop files anywhere on this page</p>
+          <p className="text-sm">or click here to browse files</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">PDF and DOCX files supported</p>
         </div>
       </div>
 
@@ -169,6 +189,7 @@ export default function HomePage() {
                 )}
             </DialogContent>
         </Dialog>
-    </main>
+      </main>
+    </div>
   );
 }
