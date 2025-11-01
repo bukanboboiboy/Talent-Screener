@@ -40,7 +40,7 @@ export default function DashboardPage() {
   }, []); // [] berarti useEffect ini hanya berjalan sekali saat halaman dibuka
 
   if (loading) {
-    return <div className="text-center p-10">Loading results...</div>;
+    return <div className="text-center p-10 text-gray-900 dark:text-white">Loading results...</div>;
   }
 
   if (error) {
@@ -50,10 +50,13 @@ export default function DashboardPage() {
   return (
     <main className="max-w-6xl mx-auto p-6">
       <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">Screening Dashboard</h1>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Screening Dashboard</h1>
           <Link href="/" passHref>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-              + Screen New CV
+            <button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Screen New CV
             </button>
           </Link>
       </div>
@@ -61,9 +64,9 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {results.length > 0 ? (
           results.map((result) => (
-            <div key={result.CandidateID} className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+            <div key={result.CandidateID} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
                {/* Di sini kamu bisa tambahkan nama file jika ada di data */}
-               <h3 className="font-bold truncate mb-4">Candidate: {result.CandidateID}</h3>
+               <h3 className="font-bold truncate mb-4 text-gray-900 dark:text-white">Candidate: {result.CandidateID}</h3>
                <ScoreDisplay 
                     score={result.Score}
                     summary={typeof result.Summary === 'string' ? JSON.parse(result.Summary) : []}
@@ -71,7 +74,7 @@ export default function DashboardPage() {
             </div>
           ))
         ) : (
-          <p>No results found. Go ahead and screen your first CV!</p>
+          <p className="text-gray-600 dark:text-gray-300">No results found. Go ahead and screen your first CV!</p>
         )}
       </div>
     </main>

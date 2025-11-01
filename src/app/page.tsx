@@ -73,25 +73,25 @@ export default function HomePage() {
   return (
     <main className="max-w-4xl mx-auto p-6 space-y-6">
       <div className="text-center">
-        <h1 className="text-4xl font-bold">Talent Screener AI</h1>
-        <p className="text-gray-600 mt-2">Batch Process Multiple CVs with Advanced State Management</p>
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Talent Screener AI</h1>
+        <p className="text-gray-600 dark:text-gray-300 mt-2">Batch Process Multiple CVs with Advanced State Management</p>
       </div>
       
       {/* Form Input */}
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-4">1. Job Description</h2>
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">1. Job Description</h2>
         <textarea
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}
           placeholder="Enter the job description..."
-          className="w-full h-24 p-3 border rounded-lg resize-none"
+          className="w-full h-24 p-3 border rounded-lg resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400"
           disabled={isProcessing}
         />
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-4">2. Upload CVs</h2>
-        <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${isDragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-300'}`}>
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">2. Upload CVs</h2>
+        <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors text-gray-700 dark:text-gray-300 ${isDragActive ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'}`}>
           <input {...getInputProps()} />
           <p>Drag 'n' drop some files here, or click to select files</p>
         </div>
@@ -99,9 +99,9 @@ export default function HomePage() {
 
       {/* Upload Queue */}
       {uploads.length > 0 && (
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold">Upload Queue ({uploads.length})</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Upload Queue ({uploads.length})</h3>
             <div className="flex gap-2">
               <Button onClick={handleStartProcessing} disabled={isProcessing || uploads.every(u => u.status !== 'pending')}>
                 {isProcessing ? 'Processing...' : 'Start Processing'}
@@ -114,11 +114,11 @@ export default function HomePage() {
           
           <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
             {uploads.map((upload) => (
-              <div key={upload.id} className="flex items-center gap-4 p-4 border rounded-lg bg-gray-50">
+              <div key={upload.id} className="flex items-center gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
                 <span className="text-2xl">{getStatusIcon(upload.status)}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{upload.file.name}</p>
-                  <p className="text-sm text-gray-600">{upload.message}</p>
+                  <p className="font-medium truncate text-gray-900 dark:text-white">{upload.file.name}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{upload.message}</p>
                   {upload.status === 'success' && upload.result && (
                     <p className="text-sm font-bold text-blue-600 mt-1">
                       Score: {upload.result.Score} / 100
