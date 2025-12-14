@@ -1,5 +1,6 @@
 // file: src/components/ScoreDisplay.tsx
 interface ScoreDisplayProps {
+  name: string;
   score: number;
   summary: string[];
 }
