@@ -34,7 +34,7 @@ export default function UploadPage() {
   const [items, setItems] = useState<UploadItem[]>([]);
   const [jobDescription, setJobDescription] = useState('');
   const [isGlobalProcessing, setIsGlobalProcessing] = useState(false);
-  
+  const [isJobDescError, setIsJobDescError] = useState(false);
   // State untuk Pop-up
   const [selectedItem, setSelectedItem] = useState<UploadItem | null>(null);
 
@@ -105,11 +105,6 @@ export default function UploadPage() {
   };
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (!jobDescription.trim()) {
-        alert("Mohon isi Deskripsi Pekerjaan (Job Description) terlebih dahulu!");
-        return;
-    }
-
     const newItems: UploadItem[] = acceptedFiles.map(file => ({
       id: Math.random().toString(36).substring(7),
       file,
@@ -118,11 +113,13 @@ export default function UploadPage() {
     }));
 
     setItems(prev => [...prev, ...newItems]);
-  }, [jobDescription]);
+  }, []);
 
   const startProcessing = async () => {
     if (!jobDescription.trim()) {
-      alert("Deskripsi Pekerjaan wajib diisi!");
+      setIsJobDescError(true); // Nyalakan tanda error merah
+      // Opsional: Scroll ke atas biar user lihat
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
@@ -206,17 +203,41 @@ export default function UploadPage() {
         </div>
 
         {/* INPUT JOB DESC */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm mb-6">
-            <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">
-                Posisi & Deskripsi Pekerjaan (Job Description)
+        <div className={`bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm mb-6 transition-all duration-300 ${isJobDescError ? 'ring-2 ring-red-100 border-red-500' : ''}`}>
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2 flex justify-between">
+                <span>Posisi & Deskripsi Pekerjaan (Job Description)</span>
+                {isJobDescError && (
+                    <span className="text-red-500 text-xs font-normal animate-pulse">
+                        ⚠️ Wajib diisi sebelum memproses
+                    </span>
+                )}
             </label>
+            
             <textarea
-                className="w-full p-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-900 dark:text-white h-32"
-                placeholder="Contoh: Dibutuhkan DevOps Engineer yang menguasai AWS..."
+                className={`w-full p-4 border rounded-lg focus:ring-2 bg-gray-50 dark:bg-gray-900 dark:text-white h-32 transition-all
+                ${isJobDescError 
+                    ? 'border-red-500 focus:ring-red-500 bg-red-50 dark:bg-red-900/10 placeholder-red-300' 
+                    : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
+                }`}
+                placeholder={isJobDescError ? "Mohon isi deskripsi pekerjaan di sini agar AI bisa bekerja..." : "Contoh: Dibutuhkan DevOps Engineer yang menguasai AWS, Docker, dan Kubernetes..."}
                 value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
+                onChange={(e) => {
+                    setJobDescription(e.target.value);
+                    if (e.target.value.trim()) setIsJobDescError(false); // Hilangkan merah kalau user mulai ngetik
+                }}
                 disabled={isGlobalProcessing || items.some(i => i.status === 'processing')}
             />
+            
+            {/* Pesan error di bawah kotak */}
+            {isJobDescError ? (
+                <p className="text-xs text-red-500 mt-2 font-medium">
+                    * AI membutuhkan Job Description untuk menilai kecocokan kandidat.
+                </p>
+            ) : (
+                <p className="text-xs text-gray-500 mt-2">
+                    * Deskripsi ini akan digunakan AI untuk menilai kecocokan kandidat.
+                </p>
+            )}
         </div>
 
         {/* DROPZONE */}
