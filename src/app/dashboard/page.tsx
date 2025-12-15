@@ -87,7 +87,7 @@ export default function DashboardPage() {
       </div>
 
       {/* GRID KARTU */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {results.length > 0 ? (
           results.map((result) => (
             <div key={result.CandidateID} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all flex flex-col justify-between">
@@ -168,7 +168,7 @@ export default function DashboardPage() {
                 <div>
                   <p className="text-sm text-gray-500">Email: {selectedCandidate.Email}</p>
                   <p className="text-sm text-gray-500">Status: <span className="font-semibold">{selectedCandidate.Status}</span></p>
-                  <p className="text-xs text-gray-400 mt-1">ID: {selectedCandidate.CandidateID}</p>
+                  {/* <p className="text-xs text-gray-400 mt-1">ID: {selectedCandidate.CandidateID}</p>  */} {/* Opsional: Tampilkan ID Kandidat jika perlu */}
                 </div>
               </div>
 

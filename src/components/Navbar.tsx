@@ -3,10 +3,27 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation'; // <--- 1. Tambah useRouter
 import ThemeToggle from './ThemeToggle';
 
 export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter(); // <--- 2. Inisialisasi Router
   const [isOpen, setIsOpen] = useState(false);
+
+  // Logic: Hilangkan Navbar di halaman login
+  if (pathname === "/login") {
+    return null;
+  }
+
+  // <--- 3. FUNGSI LOGOUT YANG BENAR
+  const handleLogout = () => {
+    // Hapus token dari penyimpanan
+    localStorage.removeItem('token'); 
+    
+    // Redirect paksa ke halaman login
+    router.push('/login');
+  };
 
   return (
     <nav className="bg-white dark:bg-gray-900 shadow-md sticky top-0 z-50">
@@ -34,11 +51,19 @@ export default function Navbar() {
               </span>
             </Link>
             <ThemeToggle />
-            <Link href="/login" passHref>
-              <span className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition cursor-pointer">
-                <svg width="30" height="30" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><path fill="currentColor" d="M17 1v1h1v4h-1V5h-1V3H6v16h10v-2h1v-1h1v4h-1v1H5v-1H4V2h1V1zm-4 5h2v1h1v1h1v1h1v1h1v2h-1v1h-1v1h-1v1h-1v1h-2v-2h1v-1h1v-1H8v-2h7V9h-1V8h-1z"/></svg>
-              </span>
-            </Link>
+            
+            {/* Tombol Logout Desktop */}
+            <button 
+              onClick={handleLogout} // <--- Panggil fungsi logout di sini
+              className="text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition cursor-pointer"
+              title="Logout"
+            >
+              <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+            </button>
           </div>
 
           {/* Mobile menu button */}
@@ -73,12 +98,22 @@ export default function Navbar() {
                   Dashboard
                 </span>
               </Link>
-              <Link href="/login" passHref>
-                <span className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition cursor-pointer flex items-center" onClick={() => setIsOpen(false)}>
-                  <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22" className="mr-2"><path fill="currentColor" d="M17 1v1h1v4h-1V5h-1V3H6v16h10v-2h1v-1h1v4h-1v1H5v-1H4V2h1V1zm-4 5h2v1h1v1h1v1h1v1h1v2h-1v1h-1v1h-1v1h-1v1h-2v-2h1v-1h1v-1H8v-2h7V9h-1V8h-1z"/></svg>
-                  Logout
-                </span>
-              </Link>
+              
+              {/* Tombol Logout Mobile */}
+              <button 
+                onClick={() => { 
+                  setIsOpen(false); 
+                  handleLogout(); // <--- Panggil fungsi logout di sini juga
+                }}
+                className="text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition cursor-pointer flex items-center"
+              >
+                <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                Logout
+              </button>
             </div>
           </div>
         )}
