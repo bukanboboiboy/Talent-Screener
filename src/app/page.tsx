@@ -197,9 +197,6 @@ export default function UploadPage() {
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Upload CV Kandidat</h1>
-            <Link href="/dashboard" className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
-                Lihat Dashboard &rarr;
-            </Link>
         </div>
 
         {/* INPUT JOB DESC */}
