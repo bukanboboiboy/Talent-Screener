@@ -43,7 +43,7 @@ export default function LoginPage() {
       const { isSignedIn, nextStep } = output;
 
       if (isSignedIn) {
-        console.log("Status: SIGNED IN! Harusnya pindah ke dashboard...");
+        console.log("Status: SIGNED IN!");
         setSuccess(true);
 
         // Redirect after showing success message
@@ -52,7 +52,7 @@ export default function LoginPage() {
         }, 1500);
       } else {
         // KEMUNGKINAN BESAR DIA MASUK SINI
-        console.log("Status: BELUM SIGNED IN. Langkah selanjutnya:", nextStep.signInStep);
+        console.log("Status: BELUM SIGNED IN.", nextStep.signInStep);
 
         if (nextStep.signInStep === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED') {
           setErrorMessage("Perlu ganti password baru (New Password Required).");
