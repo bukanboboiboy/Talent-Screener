@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import AuthGuard from '../components/AuthGuard';
-import Navbar from "@/components/Navbar";
+import Sidebar from "@/components/Sidebar";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -35,11 +35,15 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <AuthGuard>
-          <Navbar />
-          <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
-             {children}
-          </main>
-        </AuthGuard>
+            <div className="flex min-h-screen">
+              <Sidebar />
+              <div className="flex-1">
+                <main className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-all">
+                  {children}
+                </main>
+              </div>
+            </div>
+          </AuthGuard>
         </ThemeProvider>
       </body>
     </html>

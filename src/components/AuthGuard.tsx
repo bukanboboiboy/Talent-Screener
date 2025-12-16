@@ -3,37 +3,56 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { getCurrentUser } from "aws-amplify/auth";
+import { configureAmplify } from "@/utils/amplify-config";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [authorized, setAuthorized] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Cek apakah user sedang di halaman public (Login/Register)
-    // Kalau iya, biarkan lewat, jangan dicek tokennya (nanti looping)
-    if (pathname === "/login" || pathname === "/register") {
+    configureAmplify(); // Ensure Amplify is configured
+    checkAuth();
+  }, [pathname]);
+
+  const checkAuth = async () => {
+    // --- DAFTAR HALAMAN YANG BOLEH DIAKSES TANPA LOGIN ---
+    const publicPaths = ['/', '/login', '/register', '/forgot', '/reset-password'];
+
+    // Cek apakah halaman sekarang ada di daftar public
+    if (publicPaths.includes(pathname)) {
       setAuthorized(true);
+      setLoading(false);
       return;
     }
 
-    // 2. Ambil token dari saku
-    const token = localStorage.getItem("token");
-
-    // 3. Kalau nggak ada token, TENDANG ke Login
-    if (!token) {
+    // --- CEK AMPLIFY SESSION UNTUK HALAMAN LAIN (DASHBOARD DLL) ---
+    try {
+      // Check if user is authenticated with Amplify
+      await getCurrentUser();
+      setAuthorized(true);
+    } catch (error) {
+      // Not authenticated, redirect to login
+      console.log("User not authenticated, redirecting to login");
       router.push("/login");
       setAuthorized(false);
-    } else {
-      // 4. Kalau ada token, silakan masuk
-      setAuthorized(true);
+    } finally {
+      setLoading(false);
     }
-  }, [router, pathname]);
+  };
 
-  // Tampilkan layar putih/loading sebentar saat satpam lagi ngecek
-  // Biar konten rahasia nggak sempat "ngintip" (FOUC - Flash of Unauthenticated Content)
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   if (!authorized) {
-    return null; // Atau bisa return <p>Loading...</p>
+    return null;
   }
 
   return <>{children}</>;

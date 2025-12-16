@@ -1,52 +1,114 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+// Tambahkan 'confirmSignUp' untuk verifikasi OTP dan 'signOut' untuk clear session
+import { signUp, confirmSignUp, signOut } from 'aws-amplify/auth';
+import { configureAmplify } from '@/utils/amplify-config';
 import '../login/Login.css';
 
 const RegisterPage = () => {
   const router = useRouter();
-  
+
+  useEffect(() => {
+    configureAmplify();
+  }, []);
+
+  // STATE DATA FORM
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  
-  // STATE MATA (Ada 2)
+
+  // STATE UNTUK OTP
+  const [otpCode, setOtpCode] = useState('');
+  const [step, setStep] = useState<'REGISTER' | 'VERIFY'>('REGISTER'); // Default: Form Register
+
+  // UI STATES
   const [showPass, setShowPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const handleRegister = (e: React.FormEvent) => {
+  // 1. FUNGSI REGISTER (Langkah Pertama)
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
 
     if (password !== confirmPassword) {
-      setError("Password tidak sama! Coba cek lagi.");
-      return;
-    }
-    if (password.length < 6) {
-      setError("Password minimal 6 karakter ya.");
+      setError("Password tidak sama!");
       return;
     }
 
     setLoading(true);
-    console.log("Mendaftar dengan:", name, email, password);
 
-    setTimeout(() => {
+    try {
+      // Clear any existing session first to prevent "already signed in" error
+      try {
+        await signOut();
+      } catch (signOutError) {
+        // Ignore error if no user is signed in
+        console.log('No existing session to clear');
+      }
+
+      const { nextStep } = await signUp({
+        username: email,
+        password: password,
+        options: {
+          userAttributes: {
+            email: email,
+            name: name,
+          },
+        },
+      });
+
       setLoading(false);
-      setSuccess("Akun berhasil dibuat! Mengalihkan ke Login...");
-      setTimeout(() => {
+
+      // Jika butuh konfirmasi (OTP), pindah ke Step VERIFY
+      if (nextStep.signUpStep === 'CONFIRM_SIGN_UP') {
+        setSuccess(`Kode OTP dikirim ke ${email}`);
+        setStep('VERIFY'); // <--- INI KUNCINYA (Ganti Tampilan)
+      } else {
         router.push('/login');
-      }, 2000); 
-    }, 1500);
+      }
+
+    } catch (err: any) {
+      console.error("Error sign up:", err);
+      setLoading(false);
+      setError(err.message || "Gagal mendaftar.");
+    }
   };
 
-  // Helper Component biar kodingan gak kepanjangan (Reusable Icon)
+  // 2. FUNGSI VERIFIKASI OTP (Langkah Kedua)
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      // Kirim kode OTP ke AWS
+      await confirmSignUp({
+        username: email,
+        confirmationCode: otpCode
+      });
+
+      setLoading(false);
+      setSuccess("Verifikasi Berhasil! Mengalihkan ke Login...");
+
+      // Redirect ke login setelah 2 detik
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+
+    } catch (err: any) {
+      setLoading(false);
+      setError("Kode OTP salah atau kadaluarsa.");
+      console.error(err);
+    }
+  };
+
+  // Helper Icon
   const EyeIcon = ({ visible }: { visible: boolean }) => (
     visible ? (
       <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -63,85 +125,129 @@ const RegisterPage = () => {
   return (
     <div className="login-container">
       <div className="login-card">
+
+        {/* HEADER BERUBAH SESUAI STEP */}
         <div className="login-header">
-          <h2>Create Account</h2>
-          <p>Join us to start screening talents.</p>
+          {step === 'REGISTER' ? (
+            <>
+              <h2>Create Account</h2>
+              <p>Join us to start screening talents.</p>
+            </>
+          ) : (
+            <>
+              <h2>Verification</h2>
+              <p>Enter the code sent to {email}</p>
+            </>
+          )}
         </div>
 
         {error && <div className="alert-box alert-error">{error}</div>}
         {success && <div className="alert-box alert-success">{success}</div>}
 
-        <form className="login-form" onSubmit={handleRegister}>
-          <div className="input-group">
-            <label htmlFor="name">Full Name</label>
-            <input 
-              type="text" 
-              id="name" 
-              placeholder="Ex: Muhammad Isra"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required 
-            />
-          </div>
-
-          <div className="input-group">
-            <label htmlFor="email">Email</label>
-            <input 
-              type="email" 
-              id="email" 
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required 
-            />
-          </div>
-
-          {/* PASSWORD UTAMA */}
-          <div className="input-group">
-            <label htmlFor="password">Password</label>
-            <div className="password-wrapper">
-              <input 
-                type={showPass ? "text" : "password"}
-                id="password" 
-                className="input-with-icon"
-                placeholder="Create a password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+        {/* --- TAMPILAN 1: FORM REGISTER --- */}
+        {step === 'REGISTER' && (
+          <form className="login-form" onSubmit={handleRegister}>
+            <div className="input-group">
+              <label htmlFor="name">Full Name</label>
+              <input
+                type="text"
+                placeholder="Ex: Muhammad Isra"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 required
               />
-              <button type="button" className="btn-eye" onClick={() => setShowPass(!showPass)}>
-                <EyeIcon visible={showPass} />
-              </button>
             </div>
-          </div>
 
-          {/* CONFIRM PASSWORD */}
-          <div className="input-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <div className="password-wrapper">
-              <input 
-                type={showConfirm ? "text" : "password"}
-                id="confirmPassword" 
-                className="input-with-icon"
-                placeholder="Retype your password" 
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+            <div className="input-group">
+              <label htmlFor="email">Email</label>
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
-               <button type="button" className="btn-eye" onClick={() => setShowConfirm(!showConfirm)}>
-                <EyeIcon visible={showConfirm} />
+            </div>
+
+            <div className="input-group">
+              <label htmlFor="password">Password</label>
+              <div className="password-wrapper">
+                <input
+                  type={showPass ? "text" : "password"}
+                  className="input-with-icon"
+                  placeholder="Create a password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button type="button" className="btn-eye" onClick={() => setShowPass(!showPass)}>
+                  <EyeIcon visible={showPass} />
+                </button>
+              </div>
+            </div>
+
+            <div className="input-group">
+              <label htmlFor="confirmPassword">Confirm Password</label>
+              <div className="password-wrapper">
+                <input
+                  type={showConfirm ? "text" : "password"}
+                  className="input-with-icon"
+                  placeholder="Retype your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+                <button type="button" className="btn-eye" onClick={() => setShowConfirm(!showConfirm)}>
+                  <EyeIcon visible={showConfirm} />
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" className="btn-login" disabled={loading}>
+              {loading ? 'Sending OTP...' : 'Sign Up'}
+            </button>
+          </form>
+        )}
+
+        {/* --- TAMPILAN 2: FORM OTP --- */}
+        {step === 'VERIFY' && (
+          <form className="login-form" onSubmit={handleVerify}>
+            <div className="input-group">
+              <label htmlFor="otp">Verification Code</label>
+              <input
+                type="text"
+                id="otp"
+                placeholder="Ex: 123456"
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value)}
+                className="text-center text-xl tracking-widest font-bold"
+                maxLength={6}
+                required
+              />
+            </div>
+
+            <button type="submit" className="btn-login" disabled={loading}>
+              {loading ? 'Verifying...' : 'Confirm Account'}
+            </button>
+
+            <div className="mt-4 text-center">
+              <button
+                type="button"
+                onClick={() => setStep('REGISTER')}
+                className="text-sm text-gray-500 hover:text-gray-800 underline"
+              >
+                Salah Email? Kembali
               </button>
             </div>
+          </form>
+        )}
+
+        {/* FOOTER Cuma Muncul pas Register */}
+        {step === 'REGISTER' && (
+          <div className="login-footer">
+            <p>Already have an account? <a href="/login">Sign In</a></p>
           </div>
-
-          <button type="submit" className="btn-login" disabled={loading || !!success}>
-            {loading ? 'Creating Account...' : (success ? 'Success!' : 'Sign Up')}
-          </button>
-        </form>
-
-        <div className="login-footer">
-          <p>Already have an account? <a href="/login">Sign In</a></p>
-        </div>
+        )}
       </div>
     </div>
   );

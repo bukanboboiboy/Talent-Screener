@@ -2,27 +2,42 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation'; // <--- 1. Tambah useRouter
+import { useState, useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { signOut } from 'aws-amplify/auth';
+import { configureAmplify } from '@/utils/amplify-config';
 import ThemeToggle from './ThemeToggle';
 
 export default function Navbar() {
   const pathname = usePathname();
-  const router = useRouter(); // <--- 2. Inisialisasi Router
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
+  useEffect(() => {
+    configureAmplify();
+  }, []);
+
   // Logic: Hilangkan Navbar di halaman login
-  if (pathname === "/login") {
+  const disableNavbar = ["/login", "/register", "/forgot", "/reset-password"];
+
+  if (disableNavbar.includes(pathname)) {
     return null;
   }
 
-  // <--- 3. FUNGSI LOGOUT YANG BENAR
-  const handleLogout = () => {
-    // Hapus token dari penyimpanan
-    localStorage.removeItem('token'); 
-    
-    // Redirect paksa ke halaman login
-    router.push('/login');
+  // FUNGSI LOGOUT YANG BENAR DENGAN AMPLIFY
+  const handleLogout = async () => {
+    try {
+      // Sign out dari AWS Amplify
+      await signOut();
+      console.log('Successfully logged out from Amplify');
+
+      // Redirect ke halaman login
+      router.push('/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      // Tetap redirect meskipun ada error
+      router.push('/login');
+    }
   };
 
   return (
@@ -51,9 +66,9 @@ export default function Navbar() {
               </span>
             </Link>
             <ThemeToggle />
-            
+
             {/* Tombol Logout Desktop */}
-            <button 
+            <button
               onClick={handleLogout} // <--- Panggil fungsi logout di sini
               className="text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition cursor-pointer"
               title="Logout"
@@ -98,11 +113,11 @@ export default function Navbar() {
                   Dashboard
                 </span>
               </Link>
-              
+
               {/* Tombol Logout Mobile */}
-              <button 
-                onClick={() => { 
-                  setIsOpen(false); 
+              <button
+                onClick={() => {
+                  setIsOpen(false);
                   handleLogout(); // <--- Panggil fungsi logout di sini juga
                 }}
                 className="text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition cursor-pointer flex items-center"
