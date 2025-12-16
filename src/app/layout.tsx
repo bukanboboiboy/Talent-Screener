@@ -5,7 +5,6 @@ import "./globals.css";
 import AuthGuard from '../components/AuthGuard';
 import Sidebar from "@/components/Sidebar";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import ConfigureAmplifyClientSide from "@/components/ConfigureAmplify";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -40,7 +39,6 @@ export default function RootLayout({
               <Sidebar />
               <div className="flex-1">
                 <main className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-all">
-                  <ConfigureAmplifyClientSide />
                   {children}
                 </main>
               </div>
