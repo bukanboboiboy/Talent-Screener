@@ -122,7 +122,7 @@ export default function DashboardPage() {
   if (error) return <div className="text-center p-10 text-red-500">Error: {error}</div>;
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 md:p-10 md:ml-64 relative">
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 pt-20 md:p-10 md:ml-64 relative">
 
       {/* HEADER - Enhanced */}
       <div className="mb-10">
@@ -135,14 +135,14 @@ export default function DashboardPage() {
               </svg>
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Dashboard Rekrutmen</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Dashboard Rekrutmen</h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">Monitor and manage candidate screening results</p>
             </div>
           </div>
 
           {/* Action Button */}
-          <Link href="/" passHref>
-            <button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center gap-2">
+          <Link href="/upload" passHref className="w-full md:w-auto">
+            <button className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center justify-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
@@ -241,8 +241,8 @@ export default function DashboardPage() {
               <div>
                 {/* Info Kandidat */}
                 <div className="mb-5 pb-5 border-b-2 border-gray-100 dark:border-gray-700">
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex-1 mr-3">
+                  <div className="flex flex-col justify-between items-start gap-3 mb-3">
+                    <div className="flex-1 w-full">
                       <h3 className="text-xl font-bold text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                         {result.Name || "Nama Tidak Terdeteksi"}
                       </h3>
@@ -254,7 +254,7 @@ export default function DashboardPage() {
                         {result.Email || "Email tidak ditemukan"}
                       </p>
                     </div>
-                    <span className={`text-xs px-3 py-1.5 rounded-full font-bold shrink-0 shadow-sm
+                    <span className={`text-xs px-3 py-1.5 rounded-full font-bold shadow-sm self-start
                       ${result.Status === 'RECOMMENDED' ? 'bg-green-100 text-green-700' :
                         result.Status === 'REJECTED' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'}`}
                     >

@@ -210,7 +210,7 @@ export default function UploadPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 md:p-10 md:ml-64 relative">
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 pt-20 md:p-10 md:ml-64 relative">
 
       <div className="max-w-4xl mx-auto">
         {/* Enhanced Header */}
@@ -222,7 +222,7 @@ export default function UploadPage() {
               </svg>
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Upload CV Kandidat</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Upload CV Kandidat</h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">Upload and analyze candidate resumes with AI-powered screening</p>
             </div>
           </div>
@@ -282,7 +282,7 @@ export default function UploadPage() {
         {/* DROPZONE - Enhanced */}
         <div
           {...getRootProps()}
-          className={`group border-3 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all duration-300 mb-8 relative overflow-hidden
+          className={`group border-3 border-dashed rounded-2xl p-6 md:p-12 text-center cursor-pointer transition-all duration-300 mb-8 relative overflow-hidden
             ${isDragActive
               ? 'border-blue-500 bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-50 dark:from-blue-900/30 dark:via-indigo-900/30 dark:to-blue-900/30 scale-105 shadow-2xl ring-4 ring-blue-200 dark:ring-blue-800'
               : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-blue-400 hover:shadow-xl hover:scale-102'}`}
@@ -325,9 +325,9 @@ export default function UploadPage() {
         {items.length > 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
             {/* Header */}
-            <div className="p-5 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border-b border-gray-200 dark:border-gray-600 flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+            <div className="p-5 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border-b border-gray-200 dark:border-gray-600 flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="flex items-center gap-3 w-full md:w-auto">
+                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shrink-0">
                   {items.length}
                 </div>
                 <div>
@@ -335,10 +335,10 @@ export default function UploadPage() {
                   <p className="text-xs text-gray-500 dark:text-gray-400">{items.filter(i => i.status === 'success').length} completed</p>
                 </div>
               </div>
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                 <button
                   onClick={() => setItems([])}
-                  className="px-4 py-2 text-sm text-red-600 hover:text-white hover:bg-red-600 border border-red-600 rounded-lg font-medium transition-all hover:shadow-lg disabled:opacity-50"
+                  className="px-4 py-2 text-sm text-red-600 hover:text-white hover:bg-red-600 border border-red-600 rounded-lg font-medium transition-all hover:shadow-lg disabled:opacity-50 w-full sm:w-auto text-center"
                   disabled={isGlobalProcessing}
                 >
                   Clear All
@@ -346,7 +346,7 @@ export default function UploadPage() {
                 <button
                   onClick={startProcessing}
                   disabled={isGlobalProcessing || !items.some(i => i.status === 'idle')}
-                  className={`px-6 py-2 rounded-lg text-white font-bold text-sm transition-all transform 
+                  className={`px-6 py-2 rounded-lg text-white font-bold text-sm transition-all transform w-full sm:w-auto flex justify-center items-center
                     ${isGlobalProcessing || !items.some(i => i.status === 'idle')
                       ? 'bg-gray-400 cursor-not-allowed'
                       : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl hover:scale-105'}`}
