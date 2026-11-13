@@ -1,161 +1,241 @@
-/* src/app/login/Login.css */
+/* Modern B2B SaaS Auth Styling */
 
-/* 1. Center Everything & Background */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f3f4f6; /* Ganti #1f2937 kalau mau Dark Mode */
+  padding: 1.5rem;
+  background-color: #f8fafc;
+  transition: background-color 0.2s ease;
 }
 
-/* 2. The Card */
+:is(.dark *) .login-container,
+.dark .login-container {
+  background-color: #09090b;
+  background-image: radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.08) 0%, transparent 60%);
+}
+
 .login-card {
-  background: white;
+  background: #ffffff;
   padding: 2.5rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-radius: 1.25rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
   width: 100%;
-  max-width: 400px;
+  max-width: 440px;
+  transition: all 0.2s ease;
 }
 
-/* 3. Typography */
+:is(.dark *) .login-card,
+.dark .login-card {
+  background: #18181b;
+  border-color: #27272a;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+}
+
 .login-header h2 {
-  margin-bottom: 0.5rem;
-  color: #111827;
-  font-size: 1.5rem;
+  margin-bottom: 0.35rem;
+  color: #0f172a;
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
   text-align: center;
 }
 
+:is(.dark *) .login-header h2,
+.dark .login-header h2 {
+  color: #fafafa;
+}
+
 .login-header p {
-  color: #6b7280;
+  color: #64748b;
   text-align: center;
   margin-bottom: 2rem;
   font-size: 0.875rem;
 }
 
-/* 4. Inputs Styling */
+:is(.dark *) .login-header p,
+.dark .login-header p {
+  color: #a1a1aa;
+}
+
 .input-group {
   margin-bottom: 1.25rem;
 }
 
 .input-group label {
   display: block;
-  margin-bottom: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
+  margin-bottom: 0.45rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #334155;
+  letter-spacing: -0.01em;
+}
+
+:is(.dark *) .input-group label,
+.dark .input-group label {
+  color: #e4e4e7;
 }
 
 .input-group input {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.95rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  font-size: 0.9rem;
   transition: all 0.2s;
   outline: none;
   background-color: #ffffff;
-  color: #1f2937;
+  color: #0f172a;
+}
+
+:is(.dark *) .input-group input,
+.dark .input-group input {
+  background-color: #09090b;
+  border-color: #27272a;
+  color: #f4f4f5;
+}
+
+.input-group input::placeholder {
+  color: #94a3b8;
+}
+
+:is(.dark *) .input-group input::placeholder,
+.dark .input-group input::placeholder {
+  color: #52525b;
 }
 
 .input-group input:focus {
   border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-/* 5. Button */
+:is(.dark *) .input-group input:focus,
+.dark .input-group input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
 .btn-login {
   width: 100%;
-  padding: 0.75rem;
-  background-color: #111827;
-  color: white;
+  padding: 0.8rem 1rem;
+  background-color: #2563eb;
+  color: #ffffff;
   border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 1rem;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  font-size: 0.925rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
   margin-top: 1rem;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 }
 
-.btn-login:hover {
-  background-color: #000;
+.btn-login:hover:not(:disabled) {
+  background-color: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
 }
 
-/* 6. Links */
+.btn-login:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .form-actions {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 0.5rem;
 }
 
-.forgot-link, .login-footer a {
+.forgot-link,
+.login-footer a {
   color: #2563eb;
   text-decoration: none;
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: 0.8125rem;
+  font-weight: 600;
 }
 
-.forgot-link:hover {
+:is(.dark *) .forgot-link,
+:is(.dark *) .login-footer a,
+.dark .forgot-link,
+.dark .login-footer a {
+  color: #60a5fa;
+}
+
+.forgot-link:hover,
+.login-footer a:hover {
   text-decoration: underline;
 }
 
 .login-footer {
-  margin-top: 1.5rem;
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #f1f5f9;
   text-align: center;
-  font-size: 0.875rem;
-  color: #6b7280;
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
+:is(.dark *) .login-footer,
+.dark .login-footer {
+  border-top-color: #27272a;
+  color: #a1a1aa;
 }
 
 .alert-box {
-  padding: 0.75rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
+  padding: 0.8rem 1rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.85rem;
   text-align: center;
+  font-weight: 500;
 }
 
 .alert-error {
-  background-color: #fee2e2;
-  color: #b91c1c;
-  border: 1px solid #fca5a5;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.25);
 }
 
 .alert-success {
-  background-color: #dcfce7;
-  color: #15803d;
-  border: 1px solid #86efac;
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
 }
 
-/* --- SHOW PASSWORD FEATURE --- */
-
-/* Wrapper biar icon bisa ditaruh di atas input (absolute) */
 .password-wrapper {
   position: relative;
   width: 100%;
 }
 
-/* Tombol Matanya */
 .btn-eye {
   position: absolute;
   right: 12px;
   top: 50%;
-  transform: translateY(-50%); /* Biar pas di tengah vertikal */
+  transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
-  color: #9ca3af; /* Warna abu-abu soft */
-  padding: 0;
+  color: #94a3b8;
+  padding: 4px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: color 0.15s;
 }
 
 .btn-eye:hover {
-  color: #4b5563; /* Gelap dikit pas di-hover */
+  color: #475569;
 }
 
-/* Supaya teks password panjang gak nabrak icon mata */
+:is(.dark *) .btn-eye:hover,
+.dark .btn-eye:hover {
+  color: #cbd5e1;
+}
+
 .input-with-icon {
-  padding-right: 40px !important; 
+  padding-right: 42px !important;
 }

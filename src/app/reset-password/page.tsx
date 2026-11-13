@@ -21,6 +21,7 @@ function ResetPasswordContent() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
+    const [fieldErrors, setFieldErrors] = useState<{ code?: string; password?: string; confirmPassword?: string }>({});
 
     useEffect(() => {
         configureAmplify();
@@ -30,9 +31,26 @@ function ResetPasswordContent() {
         e.preventDefault();
         setError('');
 
-        // Client-side validation
-        if (password !== confirmPassword) {
-            setError("Passwords do not match!");
+        const errors: { code?: string; password?: string; confirmPassword?: string } = {};
+
+        if (!verificationCode.trim()) {
+            errors.code = "Verification code is required";
+        }
+
+        if (!password) {
+            errors.password = "New password is required";
+        } else if (password.length < 8) {
+            errors.password = "Password must be at least 8 characters";
+        }
+
+        if (!confirmPassword) {
+            errors.confirmPassword = "Confirm password is required";
+        } else if (password !== confirmPassword) {
+            errors.confirmPassword = "Passwords do not match";
+        }
+
+        setFieldErrors(errors);
+        if (Object.keys(errors).length > 0) {
             return;
         }
 
@@ -101,11 +119,11 @@ function ResetPasswordContent() {
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <h2 className="text-xl font-bold text-gray-900 mb-2">Password Reset Successful!</h2>
-                        <p className="text-gray-600 mb-6 text-sm">
+                        <h2 className="text-xl font-bold text-slate-900 dark:text-zinc-50 mb-2">Password Reset Successful!</h2>
+                        <p className="text-slate-600 dark:text-zinc-400 mb-6 text-sm">
                             Your password has been changed successfully.
                         </p>
-                        <p className="text-sm text-gray-500 mb-4">
+                        <p className="text-sm text-slate-500 dark:text-zinc-500 mb-4">
                             Redirecting to login page...
                         </p>
                     </div>
@@ -124,7 +142,7 @@ function ResetPasswordContent() {
 
                 {error && <div className="alert-box alert-error">{error}</div>}
 
-                <form className="login-form" onSubmit={handleSubmit}>
+                <form className="login-form" onSubmit={handleSubmit} noValidate>
                     <div className="input-group">
                         <label htmlFor="code">Verification Code</label>
                         <input
@@ -132,11 +150,23 @@ function ResetPasswordContent() {
                             id="code"
                             placeholder="Enter 6-digit code"
                             value={verificationCode}
-                            onChange={(e) => setVerificationCode(e.target.value)}
+                            onChange={(e) => {
+                                setVerificationCode(e.target.value);
+                                if (fieldErrors.code) setFieldErrors(prev => ({ ...prev, code: undefined }));
+                            }}
                             maxLength={6}
-                            required
+                            disabled={loading}
                         />
-                        <p className="text-xs text-gray-500 mt-1">Check your email for the code</p>
+                        {fieldErrors.code ? (
+                            <p className="text-rose-500 dark:text-rose-400 text-xs font-medium mt-1.5 flex items-center gap-1">
+                                <svg className="w-3.5 h-3.5 inline-block shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                {fieldErrors.code}
+                            </p>
+                        ) : (
+                            <p className="text-xs text-gray-500 mt-1">Check your email for the code</p>
+                        )}
                     </div>
 
                     <div className="input-group">
@@ -148,8 +178,11 @@ function ResetPasswordContent() {
                                 className="input-with-icon"
                                 placeholder="Enter new password"
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
+                                onChange={(e) => {
+                                    setPassword(e.target.value);
+                                    if (fieldErrors.password) setFieldErrors(prev => ({ ...prev, password: undefined }));
+                                }}
+                                disabled={loading}
                             />
                             <button
                                 type="button"
@@ -159,6 +192,14 @@ function ResetPasswordContent() {
                                 <EyeIcon visible={showPassword} />
                             </button>
                         </div>
+                        {fieldErrors.password && (
+                            <p className="text-rose-500 dark:text-rose-400 text-xs font-medium mt-1.5 flex items-center gap-1">
+                                <svg className="w-3.5 h-3.5 inline-block shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                {fieldErrors.password}
+                            </p>
+                        )}
                     </div>
 
                     <div className="input-group">
@@ -170,8 +211,11 @@ function ResetPasswordContent() {
                                 className="input-with-icon"
                                 placeholder="Confirm new password"
                                 value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                required
+                                onChange={(e) => {
+                                    setConfirmPassword(e.target.value);
+                                    if (fieldErrors.confirmPassword) setFieldErrors(prev => ({ ...prev, confirmPassword: undefined }));
+                                }}
+                                disabled={loading}
                             />
                             <button
                                 type="button"
@@ -181,6 +225,14 @@ function ResetPasswordContent() {
                                 <EyeIcon visible={showConfirmPassword} />
                             </button>
                         </div>
+                        {fieldErrors.confirmPassword && (
+                            <p className="text-rose-500 dark:text-rose-400 text-xs font-medium mt-1.5 flex items-center gap-1">
+                                <svg className="w-3.5 h-3.5 inline-block shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                {fieldErrors.confirmPassword}
+                            </p>
+                        )}
                     </div>
 
                     <button type="submit" className="btn-login" disabled={loading}>

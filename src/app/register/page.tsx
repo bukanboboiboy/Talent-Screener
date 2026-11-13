@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-// Tambahkan 'confirmSignUp' untuk verifikasi OTP dan 'signOut' untuk clear session
 import { signUp, confirmSignUp, signOut } from 'aws-amplify/auth';
 import { configureAmplify } from '@/utils/amplify-config';
 import '../login/Login.css';
@@ -20,9 +19,18 @@ const RegisterPage = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  // FIELD VALIDATION ERRORS
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: string;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+    otpCode?: string;
+  }>({});
+
   // STATE UNTUK OTP
   const [otpCode, setOtpCode] = useState('');
-  const [step, setStep] = useState<'REGISTER' | 'VERIFY'>('REGISTER'); // Default: Form Register
+  const [step, setStep] = useState<'REGISTER' | 'VERIFY'>('REGISTER');
 
   // UI STATES
   const [showPass, setShowPass] = useState(false);
@@ -31,16 +39,47 @@ const RegisterPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  const validateEmail = (val: string) => {
+    const trimmed = val.trim();
+    if (!trimmed) {
+      return 'Email is required.';
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmed)) {
+      return 'Please enter a valid email address.';
+    }
+    return '';
+  };
+
   // 1. FUNGSI REGISTER (Langkah Pertama)
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    const errors: typeof fieldErrors = {};
+
+    if (!name.trim()) {
+      errors.name = 'Full name is required.';
+    }
+
+    const emailErr = validateEmail(email);
+    if (emailErr) {
+      errors.email = emailErr;
+    }
+
+    if (!password) {
+      errors.password = 'Password is required.';
+    }
 
     if (password !== confirmPassword) {
-      setError("Password tidak sama!");
+      errors.confirmPassword = 'Passwords do not match.';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
+    setFieldErrors({});
     setLoading(true);
 
     try {
@@ -68,7 +107,7 @@ const RegisterPage = () => {
       // Jika butuh konfirmasi (OTP), pindah ke Step VERIFY
       if (nextStep.signUpStep === 'CONFIRM_SIGN_UP') {
         setSuccess(`Kode OTP dikirim ke ${email}`);
-        setStep('VERIFY'); // <--- INI KUNCINYA (Ganti Tampilan)
+        setStep('VERIFY');
       } else {
         router.push('/login');
       }
@@ -83,8 +122,15 @@ const RegisterPage = () => {
   // 2. FUNGSI VERIFIKASI OTP (Langkah Kedua)
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+
+    if (!otpCode.trim()) {
+      setFieldErrors({ otpCode: 'Verification code is required.' });
+      return;
+    }
+
+    setFieldErrors({});
+    setLoading(true);
 
     try {
       // Kirim kode OTP ke AWS
@@ -107,20 +153,6 @@ const RegisterPage = () => {
       console.error(err);
     }
   };
-
-  // Helper Icon
-  const EyeIcon = ({ visible }: { visible: boolean }) => (
-    visible ? (
-      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-      </svg>
-    ) : (
-      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-      </svg>
-    )
-  );
 
   return (
     <div className="login-container">
@@ -146,27 +178,43 @@ const RegisterPage = () => {
 
         {/* --- TAMPILAN 1: FORM REGISTER --- */}
         {step === 'REGISTER' && (
-          <form className="login-form" onSubmit={handleRegister}>
+          <form className="login-form" onSubmit={handleRegister} noValidate>
             <div className="input-group">
               <label htmlFor="name">Full Name</label>
               <input
                 type="text"
+                id="name"
                 placeholder="Ex: Muhammad Isra"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
+                onChange={(e) => {
+                  setName(e.target.value);
+                  if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: undefined }));
+                }}
               />
+              {fieldErrors.name && (
+                <p className="mt-1.5 text-xs font-medium text-rose-500 dark:text-rose-400">
+                  {fieldErrors.name}
+                </p>
+              )}
             </div>
 
             <div className="input-group">
               <label htmlFor="email">Email</label>
               <input
                 type="email"
+                id="email"
                 placeholder="Enter your email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: undefined }));
+                }}
               />
+              {fieldErrors.email && (
+                <p className="mt-1.5 text-xs font-medium text-rose-500 dark:text-rose-400">
+                  {fieldErrors.email}
+                </p>
+              )}
             </div>
 
             <div className="input-group">
@@ -174,11 +222,14 @@ const RegisterPage = () => {
               <div className="password-wrapper">
                 <input
                   type={showPass ? "text" : "password"}
+                  id="password"
                   placeholder="Create a password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (fieldErrors.password) setFieldErrors(prev => ({ ...prev, password: undefined }));
+                  }}
                   className="input-with-icon"
-                  required
                 />
                 <button
                   type="button"
@@ -198,10 +249,15 @@ const RegisterPage = () => {
                   )}
                 </button>
               </div>
+              {fieldErrors.password && (
+                <p className="mt-1.5 text-xs font-medium text-rose-500 dark:text-rose-400">
+                  {fieldErrors.password}
+                </p>
+              )}
 
-              {/* Password Requirements Checklist - NEW */}
-              <div className="bg-gray-50 p-4 rounded-lg text-xs space-y-2 mb-4">
-                <p className="font-semibold text-gray-700">Password must match the following rules:</p>
+              {/* Password Requirements Checklist */}
+              <div className="bg-slate-50 dark:bg-zinc-900/90 p-4 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs space-y-2 my-4">
+                <p className="font-semibold text-slate-700 dark:text-zinc-200">Password requirements:</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <PasswordCheckItem valid={password.length >= 8} label="Min. 8 characters" />
                   <PasswordCheckItem valid={/[A-Z]/.test(password)} label="1 Uppercase (A-Z)" />
@@ -216,9 +272,11 @@ const RegisterPage = () => {
                   type={showConfirm ? "text" : "password"}
                   placeholder="Confirm Password"
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    if (fieldErrors.confirmPassword) setFieldErrors(prev => ({ ...prev, confirmPassword: undefined }));
+                  }}
                   className="input-with-icon"
-                  required
                 />
                 <button
                   type="button"
@@ -238,6 +296,11 @@ const RegisterPage = () => {
                   )}
                 </button>
               </div>
+              {fieldErrors.confirmPassword && (
+                <p className="mt-1.5 text-xs font-medium text-rose-500 dark:text-rose-400">
+                  {fieldErrors.confirmPassword}
+                </p>
+              )}
             </div>
 
             <button type="submit" className="btn-login" disabled={loading}>
@@ -248,7 +311,7 @@ const RegisterPage = () => {
 
         {/* --- TAMPILAN 2: FORM OTP --- */}
         {step === 'VERIFY' && (
-          <form className="login-form" onSubmit={handleVerify}>
+          <form className="login-form" onSubmit={handleVerify} noValidate>
             <div className="input-group">
               <label htmlFor="otp">Verification Code</label>
               <input
@@ -256,11 +319,18 @@ const RegisterPage = () => {
                 id="otp"
                 placeholder="Ex: 123456"
                 value={otpCode}
-                onChange={(e) => setOtpCode(e.target.value)}
+                onChange={(e) => {
+                  setOtpCode(e.target.value);
+                  if (fieldErrors.otpCode) setFieldErrors(prev => ({ ...prev, otpCode: undefined }));
+                }}
                 className="text-center text-xl tracking-widest font-bold"
                 maxLength={6}
-                required
               />
+              {fieldErrors.otpCode && (
+                <p className="mt-1.5 text-xs font-medium text-rose-500 dark:text-rose-400 text-center">
+                  {fieldErrors.otpCode}
+                </p>
+              )}
             </div>
 
             <button type="submit" className="btn-login" disabled={loading}>
@@ -292,8 +362,8 @@ const RegisterPage = () => {
 
 // Helper Component for Password Requirement
 const PasswordCheckItem = ({ valid, label }: { valid: boolean; label: string }) => (
-  <div className={`flex items-center gap-2 ${valid ? 'text-green-600' : 'text-gray-400'}`}>
-    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] border ${valid ? 'bg-green-100 border-green-500' : 'border-gray-300'}`}>
+  <div className={`flex items-center gap-2 ${valid ? 'text-emerald-600 dark:text-emerald-400 font-medium' : 'text-slate-400 dark:text-zinc-500'}`}>
+    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] border ${valid ? 'bg-emerald-100 dark:bg-emerald-950/60 border-emerald-500' : 'border-slate-300 dark:border-zinc-700'}`}>
       {valid ? '✓' : ''}
     </span>
     <span>{label}</span>

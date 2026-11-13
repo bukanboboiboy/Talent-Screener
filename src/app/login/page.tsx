@@ -22,13 +22,36 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // State buat nampung error kalau password salah
+  // Validation & Error states
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [errorMessage, setErrorMessage] = useState('');
+
+  const validateEmail = (val: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setErrorMessage('');
+
+    // Custom React client-side validation
+    const errors: { email?: string; password?: string } = {};
+    if (!email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!validateEmail(email.trim())) {
+      errors.email = 'Please enter a valid email address';
+    }
+
+    if (!password) {
+      errors.password = 'Password is required';
+    }
+
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    setLoading(true);
 
     try {
       // Coba Login
@@ -115,7 +138,7 @@ export default function LoginPage() {
             )}
 
             {/* Login Form */}
-            <form className="login-form" onSubmit={handleSubmit}>
+            <form className="login-form" onSubmit={handleSubmit} noValidate>
               <div className="input-group">
                 <label htmlFor="email">Email</label>
                 <input
@@ -123,10 +146,20 @@ export default function LoginPage() {
                   id="email"
                   placeholder="Enter your email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: undefined }));
+                  }}
                   disabled={loading}
                 />
+                {fieldErrors.email && (
+                  <p className="text-rose-500 dark:text-rose-400 text-xs font-medium mt-1.5 flex items-center gap-1">
+                    <svg className="w-3.5 h-3.5 inline-block shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    {fieldErrors.email}
+                  </p>
+                )}
               </div>
 
               <div className="input-group">
@@ -137,9 +170,11 @@ export default function LoginPage() {
                     id="password"
                     placeholder="Enter your password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (fieldErrors.password) setFieldErrors(prev => ({ ...prev, password: undefined }));
+                    }}
                     className="input-with-icon"
-                    required
                     disabled={loading}
                   />
                   <button
@@ -160,6 +195,14 @@ export default function LoginPage() {
                     )}
                   </button>
                 </div>
+                {fieldErrors.password && (
+                  <p className="text-rose-500 dark:text-rose-400 text-xs font-medium mt-1.5 flex items-center gap-1">
+                    <svg className="w-3.5 h-3.5 inline-block shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    {fieldErrors.password}
+                  </p>
+                )}
               </div>
 
               {/* Forgot Password Link */}
