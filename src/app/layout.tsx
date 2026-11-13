@@ -5,6 +5,7 @@ import "./globals.css";
 import AuthGuard from '../components/AuthGuard';
 import Sidebar from "@/components/Sidebar";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -45,6 +46,7 @@ export default function RootLayout({
             </div>
           </AuthGuard>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
